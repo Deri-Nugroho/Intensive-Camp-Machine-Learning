@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Aurora MySQL Cluster with Subnet Group and SG
+
+Parameters:
+  DBName:
+    Type: String
+    Default: dbbayucrud
+  DBUser:
+    Type: String
+    Default: admin
+  DBPassword:
+    Type: String
+    NoEcho: true
+  DBInstanceClass:
+    Type: String
+    Default: db.r5.large
+  Subnet1:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-071524622a6c1fc65
+  Subnet2:
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-071524622a6c1fc65
+  SecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Default: sg-0381c17583617e0d0
+
+Resources:
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Subnet group for Aurora
+      SubnetIds:
+        - !Ref Subnet1
+        - !Ref Subnet2
+
+  MyDBCluster:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      Engine: aurora-mysql
+      EngineVersion: 8.0.mysql_aurora.3.04.0   # contoh Aurora MySQL 8
+      DatabaseName: !Ref DBName
+      MasterUsername: !Ref DBUser
+      MasterUserPassword: !Ref DBPassword
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      VpcSecurityGroupIds:
+        - !Ref SecurityGroupId
+
+  MyDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref MyDBCluster
+      DBInstanceClass: !Ref DBInstanceClass
+      Engine: aurora-mysql
